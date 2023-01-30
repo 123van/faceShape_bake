@@ -1,2 +1,2 @@
 #faceShape bake process
-some scripts and files
+:some scripts and files
