@@ -2418,8 +2418,102 @@ def symmetrizeLipCrv(direction):
 #miscellenious-----------------------------------------------------------------------chellenious-----------------------------------------------------------------------
 
 #record_prototypeCrv measurement    
-
 def prototypeCrv_data( protCrvs ):
+
+    crvData = {}
+    for crv in protCrvs:
+        
+        myCrv = cmds.duplicate( crv, rc=1 )[0]
+        dupCrv = cmds.rename( myCrv, "tempCrv")
+        dupCrvShp = cmds.listRelatives( dupCrv, c=1, fullPath=1, ni = 1 )
+        
+        if dupCrvShp:
+            if cmds.nodeType(dupCrvShp[0]) == "nurbsCurve":
+                          
+                rPiv = cmds.xform(dupCrv, q=True, rp=True)  # query rotation pivot
+                crvBbox = cmds.exactWorldBoundingBox( dupCrv )
+                # scale X/Y to be uniform scale of 2 
+                cmds.setAttr( dupCrv + ".sx", 1.0/crvBbox[3] )
+                cmds.setAttr( dupCrv + ".sy", 2.0/(crvBbox[4]-crvBbox[1]) )
+                cmds.setAttr( dupCrv + ".sz", 1.0/crvBbox[3] )               
+                
+                cvs = [ dupCrv + '.cv[1]', dupCrv + '.cv[2]', dupCrv + '.cv[3]', dupCrv + '.cv[5]', dupCrv + '.cv[7]', dupCrv + '.cv[8]', dupCrv + '.cv[9]' ]
+                topPos = cmds.xform( cvs[0], q=1, ws=1, t=1 )
+                upFirstPos = cmds.xform( cvs[1], q=1, ws=1, t=1)
+                upMidPos = cmds.xform( cvs[2], q=1, ws=1, t=1)
+                cornerPos = cmds.xform(cvs[3], q=1, ws=1, t=1)
+                loMidPos = cmds.xform( cvs[4], q=1, ws=1, t=1)
+                loFirstPos = cmds.xform( cvs[5], q=1, ws=1, t=1)
+                bttmPos = cmds.xform(cvs[6], q=1, ws=1, t=1)
+                
+                #Ydistnace (top to corner)/(bttom to corner) : 1 (the closer to 1, the more central the cornerCv ) 
+                centralCorner = (topPos[1]-cornerPos[1])/ (cornerPos[1] - bttmPos[1])
+                #Zdistance/Xdistance 
+                depthCorner =  abs(topPos[2]-cornerPos[2])
+                #xyRatio = [ topYLength / cornerXLength, upFirstPosY/upFirstPosX, upMidPosZ/cornerZ!!! ]
+                upXyRatio = [  abs(upFirstPos[1]-cornerPos[1])/upFirstPos[0], abs( upMidPos[2]-cornerPos[2])/(upMidPos[0]) ]                
+                loXyRatio = [  abs(cornerPos[1]-loFirstPos[1])/loFirstPos[0], abs(loMidPos[2]-cornerPos[2])/(upMidPos[0]) ]
+                
+                #yValue (topCv - bttmCV)/ xValue cornerCV 
+                #xyRatio = (topPos[1] - bttmPos[1]) /cornerPos[0]
+                dupCrvBbox = cmds.exactWorldBoundingBox( dupCrv )                               
+                NPOC = cmds.createNode("nearestPointOnCurve")
+                cmds.connectAttr( dupCrvShp[0] + ".worldSpace", NPOC + ".inputCurve")
+                cmds.setAttr(NPOC + ".inPosition", dupCrvBbox[3], dupCrvBbox[4], dupCrvBbox[2], type="double3")
+                upShpPoint = cmds.getAttr( NPOC + ".position")[0]
+                
+                upMidDist = math.sqrt( pow(upShpPoint[0]-rPiv[0],2) + pow(upShpPoint[1]-rPiv[1],2) + pow(upShpPoint[2]-rPiv[2],2) )    
+
+                  
+                cmds.setAttr(NPOC + ".inPosition", dupCrvBbox[3], dupCrvBbox[1], dupCrvBbox[2], type="double3")
+                loShpPoint = cmds.getAttr( NPOC + ".position")[0]
+                
+                loMidDist = math.sqrt( pow(loShpPoint[0]-rPiv[0],2) + pow(loShpPoint[1]-rPiv[1],2)+ pow(loShpPoint[2]-rPiv[2],2) )
+                                
+                #get parameter for upMidPos
+                cmds.setAttr(NPOC + ".inPosition", upMidPos[0], upMidPos[1], upMidPos[2], type="double3") 
+                
+                upUParam = cmds.getAttr(NPOC + ".parameter") 
+                #upLoc = cmds.spaceLocator( a=1, p= upMidPos, n= "upMidPoint_loc" )
+                          
+                #get distance loMidPoint
+                cmds.setAttr(NPOC + ".inPosition", loMidPos[0], loMidPos[1], loMidPos[2], type="double3") 
+                loUParam = cmds.getAttr(NPOC + ".parameter") 
+                #loLoc = cmds.spaceLocator( a=1, p= loMidPos, n= "loMidPoint_loc" )        
+             
+                cmds.delete(dupCrv)
+                
+                if cmds.referenceQuery( crv, isNodeReferenced=True ) == True:
+                    
+                    fName = cmds.referenceQuery(crv, filename=True)
+                    nameList = fName.split("/")[-1].split("_")
+                    title = nameList[0] + nameList[1]                
+                    
+                else:
+                    
+                    fName = ""
+                    title = crv               
+        
+                currentDict = { 
+                                "centralCorner" : centralCorner,
+                                "depthCorner" : depthCorner,
+                                "upXY_ratio" : upXyRatio,
+                                "loXY_ratio" : loXyRatio,
+                                "upMidDist" : upMidDist,
+                                "loMidDist" : loMidDist,
+                                "upMidPointParam" : upUParam,
+                                "loMidPointParam" : loUParam,
+                                "sceneName":fName,
+                                 }
+                                 
+                crvData[ title ] = currentDict
+            
+        else:
+            cmds.confirmDialog( title='Confirm', message='%s is not nurbsCurve!! '%crv ) 
+            
+    return crvData  
+    
+def prototypeCrv_data_old( protCrvs ):
 
     crvData = {}
     for crv in protCrvs:
@@ -2725,7 +2819,6 @@ def writeCrvData(protCrvs, filePath):
     
 
 
-
 def findClosesetCrvData( myCrv, filePath ):
 
     fileName = filePath.split("/")[-1]
@@ -2736,119 +2829,137 @@ def findClosesetCrvData( myCrv, filePath ):
         myCrvData = tmpData[myCrv[0]]
         myCentral = myCrvData["centralCorner"]
         myDepth = myCrvData["depthCorner"]
-        myXyRatio = myCrvData["xyRatio"]
-        myUpMidRatio = myCrvData[ "upMidRatio_toRadius" ]
-        myloMidRatio = myCrvData[ "loMidRatio_toRadius" ]
+        myUpXyRatio = myCrvData["upXY_ratio"]
+        myLoXyRatio = myCrvData["loXY_ratio"]
+        
+        myUpMidDist = myCrvData[ "upMidDist" ]
+        myLoMidDist = myCrvData[ "loMidDist" ]
+        
         myUpMidParam = myCrvData[ "upMidPointParam" ]
         myLoMidParam = myCrvData[ "loMidPointParam" ]
         
         crvFile = open(filePath)
         crvData = json.load(crvFile)
-        
-        #Ydistnace (top to corner)/(corner to bttom )
-        tmpDict = {}
-        for crv, dict in crvData.items():        
-            
-            central = dict["centralCorner"]
-            centralGap = abs(myCentral - central)
-            tmpDict[crv]= centralGap
-
-        gapList = sorted(tmpDict, key=tmpDict.get)[:5]
-
-        centerRank = {}
-        for i, centCrv in enumerate(gapList):
-            centerRank[centCrv] = i
-        
-        print centerRank
-
-        depthDict = {}
-        for crv, dict in crvData.items():        
-            
-            if crv in gapList:
-                depthCorner = dict["depthCorner"]
-                depthGap = abs(myDepth - depthCorner)
-                depthDict[crv]= depthGap
-
-        depthList = sorted( depthDict, key = depthDict.get)[:4]
-        
-        #renew ranking with depth 
-        depthRank = {}
-        for n, depCrv in enumerate(depthList):
-            for cntCrv in list(centerRank.keys()):
-                if depCrv == cntCrv:
-                    depthRank[depCrv] = n + centerRank[depCrv]
-        
-        print depthRank
-        
-        #yValue (topCv - bttmCV)/ xValue cornerCV
-        xyRatioDict = {} 
-        for k, zDict in crvData.items():        
-            
-            if k in depthList:
-                xyRatio = zDict["xyRatio"]
-                xyRatioGap = abs(myXyRatio - xyRatio)
-                xyRatioDict[k]= xyRatioGap
                 
-        xyRatioList = sorted( xyRatioDict, key = xyRatioDict.get)[:4]
+        xyDict = {} 
+        for k, zDict in crvData.items():           
+            
+            #xyRatio = [ topYLength / cornerXLength,  upFirstPosY/upFirstPosX, upMidPosY/upMidPosX ]
+            upXyRatio = zDict["upXY_ratio"]
+            upZipList = zip(myUpXyRatio, upXyRatio)
+            upMinusList = [ abs(x -y) for (x, y) in upZipList ]  
+
+            myUpXYGap = upMinusList[0] + upMinusList[1] + upMinusList[2]
+            
+            loXyRatio = zDict["loXY_ratio"]
+            loZipList = zip(myLoXyRatio, loXyRatio)
+            loMinusList = [ abs(x -y) for (x, y) in loZipList ]
+             
+            myLoXYGap = loMinusList[0] + loMinusList[1] + loMinusList[2]
+            
+            xyDict[k]= myUpXYGap + myLoXYGap
+                    
+        xyList = sorted( xyDict, key = xyDict.get)[:6]
+        
         #renew ranking with xyRatio
-        xyRatioRank = {}
-        for x, xyCrv in enumerate(xyRatioList):
-            for dpCrv in list(depthRank.keys()):
-                if xyCrv == dpCrv:
-                    xyRatioRank[xyCrv] = x + depthRank[xyCrv]
+        xyRank = {}
+        for x, xyCrv in enumerate(xyList):
+            xyRank[xyCrv] = x          
         
-        print xyRatioRank             
+        print "xyRatioRank"
+        print xyRank        
+      
+        #the closest point to the bounding box
+        midDistDict = {} 
+        for j, wDict in crvData.items():           
+            
+            #distance of midPoint (not CV) to curve pivot ( curve shape :how round the curve is ) 
+            upMidDist = wDict["upMidDist"]
+            myUpMidDistGap = abs(myUpMidDist - upMidDist)
+            
+            loMidDist = wDict["loMidDist"]
+            myLoMidDistGap = abs(myLoMidDist - loMidDist)
+            
+            midDistDict[j]= myUpMidDistGap + myLoMidDistGap
+                
+        midDistList = sorted( midDistDict, key = midDistDict.get)[:6]
+        
+        #renew ranking with midDistance
+        midDistRank = {}
+        for y, mCrv in enumerate(midDistList):
+            midDistRank[mCrv] = y
+        
+        print "midDistRank"
+        print midDistRank                 
+        
+        commonDict = {} 
+        for xyCrv, v in xyRank.items():
+            if xyCrv in midDistRank:
+                commonDict[xyCrv] = v + midDistRank[xyCrv] # sum of the ranking so far
+                 
+        print "midDistRank + xyRatioRank" 
+        print commonDict
+        
+        commonLength = len(commonDict) 
+        
+        if commonLength == 0:
+            
+            cmds.confirmDialog( title='Confirm', message='adjust jawDrop shape and rerun the script!!' ) 
+            
+        elif 0< commonLength < 3:
+            
+            finalList = sorted( commonDict, key = commonDict.get)   
+        
+        elif commonLength >= 3:
+            #Ydistnace (top to corner)/(corner to bttom )
+            centralDict = {}
+            for crv, dict in crvData.items(): 
+                
+                if crv in list(commonDict.keys()):
+                    
+                    central = dict["centralCorner"]
+                    centralGap = abs(myCentral - central)
+                    centralDict[crv]= centralGap
+            
+            centralList = sorted(centralDict, key=centralDict.get)
     
-        # distance of midPoint (not CV) to distance cornerCV ratio ( curve shape :how round the curve is ) 
-        upMidRatioDict = {}
-        for crv, dict in crvData.items():        
+            centerRank = {}
+            for n, cntCrv in enumerate(centralList):
+                
+                centerRank[cntCrv] = n + commonDict[cntCrv]
             
-            if crv in xyRatioList:
-                upMidRatio = dict["upMidRatio_toRadius"]
-                upMidParam = dict["upMidPointParam"]
-                
-                upMidRatioGap = abs(myUpMidRatio - upMidRatio )
-                upMidParamGap  = abs(myUpMidParam - upMidParam)
-               
-                upMidRatioDict[crv]= upMidRatioGap + upMidParamGap
-
-        upMidRatioList = sorted( upMidRatioDict, key = upMidRatioDict.get)[:4]
-        
-        #renew ranking with upMidRatio 
-        upRatioRank = {}
-        for y, rtCrv in enumerate(upMidRatioList):
-            for xyCrv in list(xyRatioRank.keys()):
-                if rtCrv == xyCrv:
-                    upRatioRank[rtCrv] = y + xyRatioRank[rtCrv]
-        
-        print upRatioRank       
-        
-        loMidRatioDict = {}
-        for crv, dict in crvData.items():        
+            centerRankList = sorted( centerRank, key = centerRank.get)[: commonLength-1 ] 
             
-            if crv in upMidRatioList:
-                loMidRatio = dict["loMidRatio_toRadius"] 
-                loMidParam = dict["loMidPointParam"]
+            print "central Corners Rank"
+            print centerRankList
+            
+            centralLength = len(centerRankList)            
+            
+            if centralLength == 2 :
+                finalList = centerRankList
+    
+            elif centralLength >= 3:                
                 
-                loMidRatioGap = abs(myloMidRatio - loMidRatio)
-                loMidParamGap  = abs(myLoMidParam - loMidParam)
+                depthDict = {}
+                for crv, dict in crvData.items():           
+        
+                    if crv in centralList:
+                        depthCorner = dict["depthCorner"]
+                        depthGap = abs(myDepth - depthCorner)
+                        depthDict[crv]= depthGap
+        
+                depthList = sorted( depthDict, key = depthDict.get)       
                 
-                loMidRatioDict[crv]= loMidRatioGap + loMidParamGap
-
-        loMidRatioList = sorted( loMidRatioDict, key = loMidRatioDict.get)[:4]
-
-        #renew ranking with upMidRatio 
-        loRatioRank = {}
-        for z, ratioCrv in enumerate(loMidRatioList):
-            for rtCrv in list(upRatioRank.keys()):
-                if ratioCrv == rtCrv:
-                    loRatioRank[ratioCrv] = z + upRatioRank[ratioCrv] 
-
-        print loRatioRank
-        
-        finalList = sorted( loRatioRank, key = loRatioRank.get)[:2]
-        print finalList
-        
+                depthRank = {}
+                for i, dpCrv in enumerate(depthList):
+                    
+                    depthRank[dpCrv] = i + centerRank[dpCrv]
+                    
+                finalList = sorted( depthRank, key = depthRank.get)[:2]
+                
+                print "the last ranking"
+                print finalList
+                
         if finalList:            
         
             for n, fCrv in enumerate(finalList):
@@ -2943,7 +3054,8 @@ def findClosesetCrvData( myCrv, filePath ):
                 cmds.file( referFile, i =1,  mergeNamespacesOnClash = 1 ) 
     
     else:
-        cmds.confirmDialog( title='Confirm', message='The file name should include either "lipCrv" or "browCrv"!! ' )     
+        cmds.confirmDialog( title='Confirm', message='The file name should include either "lipCrv" or "browCrv"!! ' )
+        
                 
 def findClosesetCrvData_old( myCrv, filePath ):
 
