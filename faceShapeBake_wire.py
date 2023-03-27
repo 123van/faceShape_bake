@@ -3385,3 +3385,68 @@ def jointIndices( geo, jntList ):
         jntIndex[jnt] = re.findall( '\d+', jntID )[0]
         
     return jntIndex
+
+
+
+#research the crv shapes and parameter
+def lipShapeAverage():
+
+    crvs = cmds.ls(sl=1, l =1 )
+    cvParam = {}
+    crvLsLen = len(crvs)
+    
+    oldList = [ x*0 for x in range(8)]
+    for crv in crvs:
+            
+        cvs = [ crv + '.cv[1]', crv + '.cv[2]', crv + '.cv[3]', crv + '.cv[5]', crv + '.cv[6]', crv + '.cv[7]', crv + '.cv[8]', crv + '.cv[9]' ]
+    
+        paramList = []   
+        for i, cv in enumerate(cvs):
+            
+            pos = cmds.xform( cv, q=1, ws=1, t=1 ) 
+            uParam = getUParam ( pos, crv )
+            
+            paramList.append(uParam + oldList[i] )           
+        
+        cvParam[crv]=paramList
+        print cvParam
+        
+    #sum of each parameter
+    preVal = [ x*0 for x in range(8)]
+    parmSumList = []
+    for crv, val in cvParam.items():
+        
+        if crv in crvs[1:]:
+            preVal = parmSumList
+        
+        temp = []    
+        for i, v in enumerate(val):        
+                    
+            temp.append((v + preVal[i]))
+            
+        parmSumList = temp    
+
+    avrg = [ p/crvLsLen for p in parmSumList ]
+    return avrg
+
+
+
+'''
+def jawDrop_lengthAvrg(): 
+
+#avrg = [0.0, 0.05363660170930254, 0.12546778749581972, 0.2520775429903461, 0.2974216966500808, 0.37895697129032, 0.44257646146633456, 0.5]
+
+    jawDrop =0
+    lenth = len(crvs)
+    for crv in crvs:
+        crvShp = cmds.listRelatives( crv, c=1, fullPath=1, ni = 1 )
+        if crvShp:
+            if cmds.nodeType(crvShp[0]) == "nurbsCurve":
+                        
+                crvBbox = cmds.exactWorldBoundingBox( crvShp[0] )
+                loc = cmds.spaceLocator( n = crv.split("_")[0] + "_loc")
+                cmds.xform( loc, ws=1, t = (crvBbox[0],crvBbox[1],crvBbox[2]) ) 
+                jawOpenRatio = (crvBbox[4] - crvBbox[1])/crvBbox[3]
+                jawDrop += jawOpenRatio        
+            
+    jawDrop/lenth'''
