@@ -199,7 +199,7 @@ def shapeBakeWire_tool():
     cmds.button( label = 'write CrvData', command = writeCrvData_json )  
     cmds.button( label = 'findClosestCrv', command = findClosestCrv )
     
-    print swWindow
+    print (swWindow)
     dock = "swDock"
     if cmds.dockControl(dock, exists=True):
         cmds.deleteUI(dock)
@@ -218,7 +218,7 @@ def spaceBetween( numOfRow, numOfColm ):
             cmds.text( l = '')
             
 def printNewMenuItem( item ):
-    print item
+    print (item)
 
 def arHelpImage( imageTitle ):   
 
@@ -238,7 +238,7 @@ def lipWideNarrow_helpImage( *pArgs ):
     
 def copyCrvBS_delta( *pArgs):
     wireDfmTitle = cmds.textField( 'wireDfom_name', query=True, text=True )
-    print wireDfmTitle
+    print (wireDfmTitle)
     curvs = cmds.ls( os=1 )
     # curve with blendShape
     sourceCrv = curvs[0]
@@ -259,7 +259,7 @@ def copyCrvBS_delta( *pArgs):
    
 def transferWireBS( *pArgs ):
     wireDfmName = cmds.textField( 'wireDfom_name', query=True, text=True )
-    print wireDfmName
+    print (wireDfmName)
     curvs = cmds.ls( os=1 )
     # curve with blendShape
     srcCrv = curvs[0]
@@ -309,7 +309,7 @@ def WideTight_crvBS_old(*pArgs):
         udRatioCrv = cmds.rename( temCrv, 'udRatioCrv' )
         
         meter = 1.0/totalCvs
-        print meter
+        print (meter)
         ratios =[]
         udPocs =[]
         for x in range(totalCvs+1):
@@ -342,12 +342,12 @@ def WideTight_crvBS_old(*pArgs):
             cmds.setAttr( poc + ".parameter", prm*(i+1) - rt/10.0 )
 
             tightPos = cmds.getAttr( poc + ".position" )[0]
-            print tightPos
+
             cmds.xform( tightCrv + ".cv[%s]"%cvIndex, ws=1, t = tightPos )
             
             cmds.setAttr( poc + ".parameter", prm*(i+1) + rt/10.0 )
             widePos = cmds.getAttr( poc + ".position" )[0]
-            print widePos
+
             cmds.xform( wideCrv + ".cv[%s]"%cvIndex, ws=1, t = widePos )
             
             cmds.setAttr( poc + ".parameter", prm*(i+1))
@@ -433,7 +433,6 @@ def WideTight_crvBS_func( movingCvs ):
         caches =[]
         for x in range(1, moveNumCVs+1):
             
-            print x
             frmeCache = cmds.createNode('frameCache', n = "ratio_cache%s"%str(x).zfill(2) )
             cmds.connectAttr( wtBaseCrv + '.ratioCrv', frmeCache + '.stream')
             cmds.setAttr( frmeCache + ".varyTime", x  )
@@ -743,7 +742,7 @@ def curve_halfVerts( *pArgs ):
     character = cmds.optionMenu('crv_title', query=True, value=True )
     name = item + character
     trackSelectionOrder = cmds.selectPref( q=1, tso=1 )
-    print item, name
+    print (item, name)
     if trackSelectionOrder == False:
         cmds.confirmDialog( title='Confirm', message='the trackSelectionOrder should be on in preference' )
     
@@ -1055,7 +1054,7 @@ def boundingRatio_2Object( source, target ):
 
     #source curve bounding box
     scOrig = [ x for x in cmds.listRelatives( source, s=1, fullPath=1 ) if 'Orig' in x ]
-    print scOrig
+    print (scOrig)
     scBbox = cmds.exactWorldBoundingBox( scOrig )
     xScLen = scBbox[3]-scBbox[0]
     yScLen = scBbox[4]-scBbox[1]
@@ -1177,7 +1176,7 @@ def symmetrizeLipCrv(direction):
                 for cv in crvCvs:
                     pos = cmds.xform( cv, q=1, ws=1, t=1 )
                     if pos[0]**2 < 0.00001 :
-                        print cv
+
                         num = cv.split('[')[1][:-1]
                         centerCV.append(int(num))
                 
@@ -1195,15 +1194,15 @@ def symmetrizeLipCrv(direction):
                         leftNum = opphalf
                         rightNum = halfNum[::-1]
                                 
-                    print leftNum, rightNum    
+                    print (leftNum, rightNum)
                     if direction == 1:
-                        print "left cv to right cv"
+                        print ("left cv to right cv")
                         for i in range(halfLen):
                             pos = cmds.xform( crvCvs[leftNum[i]], q=1, ws=1, t=1 )
                             cmds.xform( crvCvs[rightNum[i]], ws=1, t=( -pos[0], pos[1], pos[2] ) )
                         
                     else:
-                        print "right cv to left cv"
+                        print ("right cv to left cv")
                         for i in range(halfLen):
                             pos = cmds.xform( crvCvs[rightNum[i]], q=1, ws=1, t=1 )
                             cmds.xform( crvCvs[leftNum[i]], ws=1, t=( -pos[0], pos[1], pos[2] ) )                
@@ -1233,13 +1232,13 @@ def symmetrizeLipCrv(direction):
                         rightNum = halfNum[::-1]        
                         
                     if direction == 1:
-                        print "left cv to right cv"
+                        print ("left cv to right cv")
                         for i in range( halfLen ):
                             pos = cmds.xform( crvCvs[leftNum[i]], q=1, ws=1, t=1 )
                             cmds.xform( crvCvs[rightNum[i]], ws=1, t=( -pos[0], pos[1], pos[2] ) )
                         
                     else:
-                        print "right cv to left cv"
+                        print ("right cv to left cv")
                         for i in range(halfLen ):
                             pos = cmds.xform( crvCvs[rightNum[i]], q=1, ws=1, t=1 )
                             cmds.xform( crvCvs[leftNum[i]], ws=1, t=( -pos[0], pos[1], pos[2] ) )
@@ -1361,7 +1360,7 @@ def lipWire_setupFunc():
                 jawDrop = cmds.duplicate( headBase, rc=1, n = "jawDrop_geo" )[0]
                 
                 shapeCrvPrnt = cmds.listRelatives( shapeCrv, p=1)[0]
-                print bend
+                print (bend)
                 bendHand = cmds.listConnections( bend[0] + '.matrix', s=1, d=0 )[0] 
                 cmds.parent( shapeCrv, bendHand, jawDrop, shpWireGrp )                        
                 cmds.delete(shapeCrvPrnt)
@@ -1462,7 +1461,7 @@ def browWire_func( BS_node ):
     if len(cmds.ls(headBase))==1:
 
         if not cmds.nodeType( cmds.listRelatives(headBase, pa=1, c=1)[0]) == "mesh":
-            print "select browWireCrv and head_base geo in order!!"
+            print ("select browWireCrv and head_base geo in order!!")
             
         else:         
                 
@@ -1521,7 +1520,7 @@ def browWire_func( BS_node ):
                 cmds.hide(browWireHeads)               
         
     else:
-        print "There are more than 1 %s!!"%headBase
+        print ("There are more than 1 %s!!"%headBase)
 '''
 # select browCrv / headGeo in order
 browSculpt = cmds.ls( sl=1 )
@@ -1561,7 +1560,7 @@ def shrinkBrow_Func( browCrv, headBase, bsNode ):
         startPos = cmds.getAttr( loc + '.ty')
         
         tranY = endPos - startPos
-        print tranY     
+        print (tranY)
 
     else:
         cmds.confirmDialog( title='Confirm', message='selected obj has no blendShape!!' )
@@ -1715,7 +1714,7 @@ def copyOrigMesh( obj, name ):
             if 'Orig' in ts:
                 tempOrig = cmds.rename( ts, name+ 'Shape' )
             else:
-                print "delete %s"%ts
+                print ("delete %s"%ts)
                 cmds.delete(ts)
         
         cmds.setAttr( tempOrig+".intermediateObject", 0)
@@ -1769,7 +1768,7 @@ def shapeToCurve():
     for i, vtx in enumerate( orderVtx ):
         pos = cmds.xform( vtx, q=1, ws=1, t=1 ) 
         uParam = getUParam ( pos, targetCrv )
-        print uParam        
+        print (uParam )       
         dnPOC = cmds.shadingNode ( 'pointOnCurveInfo', asUtility=True, n = 'dnPOC'+ str(i+1).zfill(2))
         #loc = cmds.spaceLocator ( n = "targetPoc"+ str(i+1).zfill(2))
         cmds.connectAttr (targetCrvShape[0] + ".worldSpace",  dnPOC + '.inputCurve')
@@ -1818,7 +1817,7 @@ def getDagPath(objectName):
         return oNodeList
     else:
         selectionList = OpenMaya.MSelectionList()
-        print selectionList, objectName
+        print (selectionList, objectName)
         selectionList.add(objectName)
         oNode = OpenMaya.MDagPath()
         selectionList.getDagPath(0, oNode)
@@ -1844,7 +1843,7 @@ def splitXYZ(*pArgs):
                 xyzTarget.append(tgtMesh)       
             
         cmds.blendShape( xyzTarget, sel[1], n = sel[0]+"_xyzBS" )
-        print xyzTarget
+        print (xyzTarget)
         cmds.delete( xyzTarget )
 
         
@@ -1977,7 +1976,7 @@ def targetAdd(*pArgs):
 
 def targetAddReconnect(*pArgs):
     bsNode = cmds.optionMenu( 'blendShape_list', query=True, value=True)
-    print bsNode
+    print (bsNode)
     targetAdd_Reconnect_func( bsNode )
 
     
@@ -1996,14 +1995,14 @@ def targetAdd_Reconnect_func( BSnode ):
         if not deformList:
             xx = [ x for x in shp if "Orig" in x ]
             if xx:
-                print "delete %s"%xx
+                print ("delete %s"%xx)
                 cmds.delete(xx)
             
         aliasAtt = cmds.aliasAttr(BSnode, q=1)
         if target in aliasAtt:
             for tgt, wgt in zip(*[iter(aliasAtt)]*2):
                 tgtID = wgt.split("[")[1][:-1]        
-                print tgtID
+                print (tgtID)
                 # check if target curve exists
                 if target == tgt :
                     tgtID = wgt.split("[")[1][:-1]
@@ -2012,14 +2011,14 @@ def targetAdd_Reconnect_func( BSnode ):
                         if connection:
                             continue
                         else:
-                            print shp[0], tgtID
+                            print (shp[0], tgtID)
                             cmds.connectAttr( shp[0]+".worldMesh", BSnode+ ".inputTarget[0].inputTargetGroup[%s].inputTargetItem[6000].inputGeomTarget"%str(tgtID) )
                             
                     elif cmds.nodeType(shp[0]) == "nurbsCurve":
                         cmds.connectAttr( shp[0]+".worldSpace", BSnode+ ".inputTarget[0].inputTargetGroup[%s].inputTargetItem[6000].inputGeomTarget"%str(tgtID) )
                                     
         else:
-            print target
+            print (target)
             maxNum = []
             for x, y in zip(*[iter(aliasAtt)]*2):
                 num = y.split("[")[1][:-1]
@@ -2053,9 +2052,9 @@ def vertices_distanceOrder( myVert ):
             
             vertDist[ vt ] = dist    
         
-        print vertDist
+        print (vertDist)
         secondVert = min(vertDist, key= vertDist. get) 
-        print secondVert    
+        print (secondVert)    
     
         orderedVerts.append(secondVert)
         firstVert = secondVert
@@ -2097,7 +2096,8 @@ def curve_halfVertsFunc( myVert, name, openClose, degree ):
         cmds.delete( crvRebuild[0], ch=1 )
     
     cmds.xform( crvRebuild[0], centerPivots =1 )
-    
+
+'''
 def EPCurve_chordLength():
     vtx = cmds.ls( os=1, fl=1 )
     vt = cmds.xform( vtx[0], q=1, t=1, ws=1)
@@ -2128,7 +2128,7 @@ def EPCurve_chordLength():
                                   False, 
                                   False, 
                                   True 
-                         	    ) 
+                         	    )''' 
                          	    
                          	    
 #select left vtx
@@ -2279,12 +2279,12 @@ def mapCurve( vtx, name, openClose, degree ):
 
 def symmetrizeOpen( *pArgs ):
     check = cmds.checkBox( 'directionTo', query=True, value = True)
-    print check
+    print (check)
     symmetrizeOpenCrv(check)
     
 def symmetrizeClose( *pArgs ):
     check = cmds.checkBox( 'directionTo', query=True, value = True)
-    print check
+    print (check)
     symmetrizeLipCrv(check)
 
     
@@ -2298,7 +2298,7 @@ def symmetrizeOpenCrv(direction):
     leng = len(crvNum )
         
     if direction == True:
-        print "left cv to right cv"
+        print ("left cv to right cv")
         for i in range(leng/2 ):
             xPos = cmds.getAttr(crvNum[leng-i-1]+".xValue" )
             cmds.setAttr( crvNum[i]+".xValue", -xPos)
@@ -2308,7 +2308,7 @@ def symmetrizeOpenCrv(direction):
             cmds.setAttr( crvNum[i]+".zValue", zPos)
 
     else:
-        print "right cv to left cv"
+        print ("right cv to left cv")
         for i in range(leng/2 ):
             xPos = cmds.getAttr(crvNum[i]+".xValue" )
             cmds.setAttr( crvNum[leng-i-1]+".xValue", -xPos)
@@ -2339,7 +2339,7 @@ def symmetrizeLipCrv(direction):
                 for cv in crvCvs:
                     pos = cmds.xform( cv, q=1, ws=1, t=1 )
                     if pos[0]**2 < 0.0001 :
-                        print cv
+                        print (cv)
                         num = cv.split('[')[1][:-1]
                         centerCV.append(int(num))
                 
@@ -2357,7 +2357,7 @@ def symmetrizeLipCrv(direction):
                         leftNum = opphalf
                         rightNum = halfNum[::-1]
                                 
-                    print leftNum, rightNum    
+                    print (leftNum, rightNum)    
                     if direction == True:
                         print "left cv to right cv"
                         for i in range(halfLen):
@@ -3388,44 +3388,38 @@ def jointIndices( geo, jntList ):
 
 
 
-#research the crv shapes and parameter
+#research the crv shapes and parameter ##{u'|barbieLip_crv_grp|lipParam_wireCrv02': [0.0, 0.05363660170930254, 0.12546778749581972, 0.2520775429903461, 0.2974216966500808, 0.37895697129032, 0.44257646146633456, 0.5], u'|barbie_grandmaLip_grp|targetCrv_grp|lip_wire_crv01': [0.0, 0.04836654372178782, 0.12999410154951657, 0.2478650713167129, 0.3131318368164065, 0.37551059553018656, 0.43678986326725106, 0.5], u'|madMan_lipWire_Protype|baseCrv_grp|lipShpToCrv02': [0.0, 0.05565962947334612, 0.12367107770701294, 0.25183612569990255, 0.2971623071720158, 0.37881887117302876, 0.44208056545744756, 0.5]}
 def lipShapeAverage():
 
     crvs = cmds.ls(sl=1, l =1 )
     cvParam = {}
-    crvLsLen = len(crvs)
-    
-    oldList = [ x*0 for x in range(8)]
+    crvLsLen = len(crvs)    
+
     for crv in crvs:
             
-        cvs = [ crv + '.cv[1]', crv + '.cv[2]', crv + '.cv[3]', crv + '.cv[5]', crv + '.cv[6]', crv + '.cv[7]', crv + '.cv[8]', crv + '.cv[9]' ]
+        cvs = [ crv + '.cv[1]', crv + '.cv[2]', crv + '.cv[3]', crv + '.cv[4]', crv + '.cv[5]', crv + '.cv[6]', crv + '.cv[7]', crv + '.cv[8]', crv + '.cv[9]' ]
     
-        paramList = []   
+        paramList = []
         for i, cv in enumerate(cvs):
             
             pos = cmds.xform( cv, q=1, ws=1, t=1 ) 
             uParam = getUParam ( pos, crv )
             
-            paramList.append(uParam + oldList[i] )           
+            paramList.append(uParam )           
         
         cvParam[crv]=paramList
         print cvParam
         
     #sum of each parameter
-    preVal = [ x*0 for x in range(8)]
-    parmSumList = []
+    CVsLen = len(cvs)
+    parmSumList = [ x*0 for x in range(CVsLen)]
     for crv, val in cvParam.items():
         
-        if crv in crvs[1:]:
-            preVal = parmSumList
-        
-        temp = []    
-        for i, v in enumerate(val):        
-                    
-            temp.append((v + preVal[i]))
-            
-        parmSumList = temp    
+        for i, v in enumerate(val):
+            parmSumList[i] = parmSumList[i] + v
 
+    #print parmSumList
+    
     avrg = [ p/crvLsLen for p in parmSumList ]
     return avrg
 
@@ -3450,3 +3444,153 @@ def jawDrop_lengthAvrg():
                 jawDrop += jawOpenRatio        
             
     jawDrop/lenth'''
+
+
+#select center vertex on the loop of lip / adjasent vertex(direction)
+def prototypeLipCrv( ):
+
+    tempVerts = orderedVerts_edgeLoop()
+    vertsOnLoop = [tempVerts[-1]] + tempVerts +tempVerts[:2]
+    vertsPos = []
+    for v in vertsOnLoop:
+        pos = cmds.xform( v, q =1, ws =1, t =1 )
+        vertsPos.append(pos) 
+        
+    #knots = number of CVs + degree - 1
+    knotLen = [ x for x in range(len(vertsPos)+2) ]
+    tempCrv = cmds.curve( d =3, per=1, p = vertsPos , k = knotLen  )
+    loopCrv = cmds.rebuildCurve( tempCrv, ch =0, rpo =1, kr=0, kcp=1, kep=1, d=3 )[0]
+    cmds.xform( loopCrv, cp=1 )
+
+    avrg = [0.0, 0.054260471676417114, 0.12498473808447197, 0.19663351979864205, 0.250, 0.3018463892654337, 0.3788140065929279, 0.44033009804322876, 0.5]
+
+    loopCrvShp = cmds.listRelatives( loopCrv, c=1, typ = "nurbsCurve")[0]
+    pointPos = []
+    for i, param in enumerate(avrg):  
+        
+        paramPoc = cmds.shadingNode( 'pointOnCurveInfo', asUtility =1, n = 'paramPoc'+ str(i+1))        
+        cmds.connectAttr( loopCrvShp + ".worldSpace", paramPoc + ".inputCurve")
+        cmds.setAttr( paramPoc + ".parameter", param )
+        pos = cmds.getAttr(paramPoc + ".result.position")[0]
+
+        pointPos.append(list(pos))
+        #loc = cmds.spaceLocator ( n = "lipPoc_loc"+str(i+1) )[0]
+        #cmds.connectAttr( paramPoc + '.result.position', loc + '.translate' )    
+
+    prototypeCurve( pointPos, "lip", "close", 3 )
+
+
+
+def prototypeCurve( pointPos, name, openClose, degree ):
+      
+    orderPos =[]
+    mirrOrderPos =[] 
+
+    pos1 = pointPos[0]
+    print pos1
+    # verts selection is only left part
+    if pos1[0]**2 < 0.001:
+        for pp in pointPos[::-1]:
+
+            mrrPos = [-pp[0],pp[1],pp[2]]
+            mirrOrderPos.append(mrrPos)
+            
+    # if verts selection in order entire region
+    else:
+        cmds.confirmDialog( title='Confirm', message='object or center vertex is off from center in X axis' )
+    
+    # "open" / "close"
+    if openClose == "open":
+        orderPosAll = mirrOrderPos[:-1] + orderPos
+        browMapCrv = cmds.curve( d=float(degree), p= orderPosAll )
+        #create unique name
+        mapCrv = cmds.ls( name + "_crv*", typ = "transform" )
+        if not mapCrv:
+            newNum = 01
+        else:
+            lastNum = re.findall('\d+', mapCrv[-1])[0]
+            newNum = int(lastNum)+1
+        mapCrv = cmds.rename( browMapCrv,  name + "_crv"+ str(newNum).zfill(2) )
+        return mapCrv
+        
+    elif openClose == "close":
+        
+        #create unique name
+        mapCrv = cmds.ls( name + "_crv*", typ = "transform" )
+        if not mapCrv:
+            newNum = 01
+        else:
+            number = re.findall('\d+', mapCrv[-1])[0]
+            newNum = int(number)+1
+            
+        '''#create cv curve
+        #앞 3개의 포인트와 마지막 세개의 포인트가 같아야 한다( 앞뒤 3개의 CVs가 하나의 span 을 만들기 때문에 )
+        orderPos = mirrOrderPos[-2:] + pointPos[1:] + mirrOrderPos[1:] + pointPos[1:2]
+        print orderPos
+        knotLen = [ x for x in range(len(orderPos)+2) ]
+        closeCrv = cmds.curve( d =3, per=1, p = orderPos , k = knotLen  )'''
+        
+        #create ep curve
+        coords = pointPos + mirrOrderPos[1:] 
+        curveFn = OpenMaya.MFnNurbsCurve() 
+        arr = OpenMaya.MPointArray()
+        for position in coords: 
+            arr.append(*position)            
+        
+        curveFn.createWithEditPoints( 
+                                      arr, 
+                                      int(degree), 
+                                      OpenMaya.MFnNurbsCurve.kPeriodic, 
+                                      False, 
+                                      False, 
+                                      True 
+                                    )
+        
+        #cmds.select( closeCrv, r=1 )
+        #symmetrizeLipCrv(1)        
+     
+        
+        #return closeCrv   
+
+
+#select 2 adjasent vertices ( corner and direction vertex)
+#edge loop상에 있는 버텍스 순서대로 나열한다( for curves )
+def orderedVerts_edgeLoop():
+    
+    myVert = cmds.ls( os=1, fl=1 )
+    if len(myVert)==2:
+        firstVert = myVert[0]
+        secondVert = myVert[1]
+        
+        cmds.select (firstVert,secondVert, r =1)
+        mel.eval('ConvertSelectionToContainedEdges')        
+        firstEdge = cmds.ls( sl=1 )[0]
+        
+        cmds.polySelectSp( firstEdge, loop =1 )
+        edges = cmds.ls( sl=1, fl=1 )
+        edgeDict = edgeVertDict(edges) #{edge: [vert1, vert2], ...}
+        ordered = [firstVert, secondVert]
+        for i in range( len(edges)-2 ):            
+            del edgeDict[firstEdge]
+            #print edgeDict
+            for x, y in edgeDict.iteritems():
+                if secondVert in y:                    
+                    xVerts = y
+                    xVerts.remove(secondVert)
+                    firstEdge = x
+        
+            secondVert = xVerts[0]
+            ordered.append( secondVert )
+        return ordered
+    
+    else:
+        print 'select 2 adjasent vertex!!'
+        
+def edgeVertDict(edgeList):
+    edgeVertDict = { }
+    for edge in edgeList:
+        cmds.select(edge, r =1)
+        cmds.ConvertSelectionToVertices()
+        edgeVert = cmds.ls(sl=1, fl=1)
+        edgeVertDict[edge] = edgeVert
+    return edgeVertDict
