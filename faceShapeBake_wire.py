@@ -3447,7 +3447,7 @@ def jawDrop_lengthAvrg():
 
 
 #select center vertex on the loop of lip / adjasent vertex(direction)
-def create_protypCrv( ):
+def create_prototypeCrv( ):
 
     cvSel = cmds.ls(os=1, type = "mesh")
     if cvSel:
