@@ -3447,37 +3447,41 @@ def jawDrop_lengthAvrg():
 
 
 #select center vertex on the loop of lip / adjasent vertex(direction)
-def prototypeLipCrv( ):
+def create_protypCrv( ):
 
-    tempVerts = orderedVerts_edgeLoop()
-    vertsOnLoop = [tempVerts[-1]] + tempVerts +tempVerts[:2]
-    vertsPos = []
-    for v in vertsOnLoop:
-        pos = cmds.xform( v, q =1, ws =1, t =1 )
-        vertsPos.append(pos) 
-        
-    #knots = number of CVs + degree - 1
-    knotLen = [ x for x in range(len(vertsPos)+2) ]
-    tempCrv = cmds.curve( d =3, per=1, p = vertsPos , k = knotLen  )
-    loopCrv = cmds.rebuildCurve( tempCrv, ch =0, rpo =1, kr=0, kcp=1, kep=1, d=3 )[0]
-    cmds.xform( loopCrv, cp=1 )
+    cvSel = cmds.ls(os=1, type = "mesh")
+    if cvSel:
+        cmds.select( cvSel[0], cvSel[1] )
+        # select vertices on the loop
+        tempVerts = orderedVerts_edgeLoop()
+        vertsOnLoop = [tempVerts[-1]] + tempVerts +tempVerts[:2]
+        vertsPos = []
+        for v in vertsOnLoop:
+            pos = cmds.xform( v, q =1, ws =1, t =1 )
+            vertsPos.append(pos) 
+            
+        #knots = number of CVs + degree - 1
+        knotLen = [ x for x in range(len(vertsPos)+2) ]
+        tempCrv = cmds.curve( d =3, per=1, p = vertsPos , k = knotLen  )
+        loopCrv = cmds.rebuildCurve( tempCrv, ch =0, rpo =1, kr=0, kcp=1, kep=1, d=3 )[0]
+        cmds.xform( loopCrv, cp=1 )
 
-    avrg = [0.0, 0.054260471676417114, 0.12498473808447197, 0.19663351979864205, 0.250, 0.3018463892654337, 0.3788140065929279, 0.44033009804322876, 0.5]
+        avrg = [0.0, 0.054260471676417114, 0.12498473808447197, 0.19663351979864205, 0.250, 0.3018463892654337, 0.3788140065929279, 0.44033009804322876, 0.5]
 
-    loopCrvShp = cmds.listRelatives( loopCrv, c=1, typ = "nurbsCurve")[0]
-    pointPos = []
-    for i, param in enumerate(avrg):  
-        
-        paramPoc = cmds.shadingNode( 'pointOnCurveInfo', asUtility =1, n = 'paramPoc'+ str(i+1))        
-        cmds.connectAttr( loopCrvShp + ".worldSpace", paramPoc + ".inputCurve")
-        cmds.setAttr( paramPoc + ".parameter", param )
-        pos = cmds.getAttr(paramPoc + ".result.position")[0]
+        loopCrvShp = cmds.listRelatives( loopCrv, c=1, typ = "nurbsCurve")[0]
+        pointPos = []
+        for i, param in enumerate(avrg):  
+            
+            paramPoc = cmds.shadingNode( 'pointOnCurveInfo', asUtility =1, n = 'paramPoc'+ str(i+1))        
+            cmds.connectAttr( loopCrvShp + ".worldSpace", paramPoc + ".inputCurve")
+            cmds.setAttr( paramPoc + ".parameter", param )
+            pos = cmds.getAttr(paramPoc + ".result.position")[0]
 
-        pointPos.append(list(pos))
-        #loc = cmds.spaceLocator ( n = "lipPoc_loc"+str(i+1) )[0]
-        #cmds.connectAttr( paramPoc + '.result.position', loc + '.translate' )    
+            pointPos.append(list(pos))
+            #loc = cmds.spaceLocator ( n = "lipPoc_loc"+str(i+1) )[0]
+            #cmds.connectAttr( paramPoc + '.result.position', loc + '.translate' )    
 
-    prototypeCurve( pointPos, "lip", "close", 3 )
+        prototypeCurve( pointPos, "lip", "close", 3 )
 
 
 
