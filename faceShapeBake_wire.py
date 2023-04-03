@@ -3451,7 +3451,40 @@ def create_protypCrv( ):
 
     cvSel = cmds.ls(os=1, type = "mesh")
     if cvSel:
-        cmds.select( cvSel[0], cvSel[1] )
+        #rebuild the polyEdgeToCurve1 for lip & jawDrop ctl
+        if len(myVert)==2:
+            firstVert = myVert[0]
+            secondVert = myVert[1]
+            
+            cmds.select (firstVert,secondVert, r =1)
+            mel.eval('ConvertSelectionToContainedEdges')
+            firstEdge = cmds.ls( sl=1 )[0]
+            
+            cmds.polySelectSp( firstEdge, loop =1 )
+            tempCrv=cmds.polyToCurve(form=3,degree=1)
+                
+        jawDropVal =0
+        crvShp = cmds.listRelatives( tempCrv, c=1, fullPath=1, ni = 1 )
+        if crvShp:
+            if cmds.nodeType(crvShp[0]) == "nurbsCurve":
+                        
+                crvBbox = cmds.exactWorldBoundingBox( crvShp[0] )
+                cmds.xform( loc, ws=1, t = (crvBbox[0],crvBbox[1],crvBbox[2]) ) 
+                jawDropVal = crvBbox[3]*2
+                
+        ctlName = cmds.promptDialog(
+                        title='put name for jawDrop ctl',
+                        message='Enter Name:',
+                        button=['OK', 'Cancel'],
+                        defaultButton='OK',
+                        cancelButton='Cancel',
+                        dismissString='Cancel')
+
+        if ctlName == 'OK':
+                jawDropCtl = cmds.promptDialog(query=True, text=True)
+                cmds.setAttr( jawDropCtl + ".ty", jawDropVal )
+
+        cmds.select (firstVert,secondVert, r =1)
         # select vertices on the loop
         tempVerts = orderedVerts_edgeLoop()
         vertsOnLoop = [tempVerts[-1]] + tempVerts +tempVerts[:2]
